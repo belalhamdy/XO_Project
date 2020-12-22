@@ -2,17 +2,19 @@
 
 #define GRID_SIZE 3
 #define EMPTY -1
+#define TIE 0
+#define GAME_IN_PROCESS GRID_SIZE*4
 #define X 1
 #define O 0
 
 /*
  Returns:
- * 0 -> no one wins and TIE
+ * 0 TIE -> no one wins and TIE
  * +ve number <= GRID_SIZE(3) -> index of row that wins
  * -ve number <= GRID_SIZE(3) -> index of col that wins
  * GRID_SIZE + 1 (4) -> diagonal that goes from left to right wins
  * - (GRID_SIZE + 1) (-4) -> diagonal that goes from right to left wins
- * Anything Else (GRID_SIZE * 4)
+ * Anything Else -> GAME_IN_PROCESS (GRID_SIZE * 4)
  */
 int check_win(int grid[GRID_SIZE][GRID_SIZE]);
 
@@ -33,17 +35,17 @@ int main() {
             {-1, -1, -1},
             {-1, -1, -1},
             {-1, -1, -1}};
-    while (check_win(grid) == GRID_SIZE * 4) {
+    while (check_win(grid) == GAME_IN_PROCESS) {
         computer_turn(grid, X);
         print_grid(grid);
         puts("");
-        if (check_win(grid) != GRID_SIZE * 4) {
+        if (check_win(grid) != GAME_IN_PROCESS) {
             printf("X WINS\n");
         }
         computer_turn(grid, O);
         print_grid(grid);
         puts("");
-        if (check_win(grid) != GRID_SIZE * 4)
+        if (check_win(grid) != GAME_IN_PROCESS)
             printf("O WINS\n");
         if (!check_win(grid)) return 0;
     }
@@ -82,9 +84,9 @@ int check_win(int grid[GRID_SIZE][GRID_SIZE]) {
         for (j = 0; j < GRID_SIZE; ++j)
             empty_cells += (grid[i][j] == EMPTY);
 
-    if (empty_cells == 0) return 0;
+    if (empty_cells == 0) return TIE;
 
-    return GRID_SIZE * 4; // A unique number that defines that the game has not ended yet
+    return GAME_IN_PROCESS; // A unique number that defines that the game has not ended yet
 }
 
 /*
