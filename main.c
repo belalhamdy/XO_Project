@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 
 #define GRID_SIZE 3
 #define EMPTY -1
@@ -16,6 +18,8 @@
  * - (GRID_SIZE + 1) (-4) -> diagonal that goes from right to left wins
  * Anything Else -> GAME_IN_PROCESS (GRID_SIZE * 4)
  */
+FILE *f;
+
 int check_win(int grid[GRID_SIZE][GRID_SIZE]);
 
 int computer_turn(int grid[GRID_SIZE][GRID_SIZE], int computer_mark);
@@ -30,25 +34,78 @@ void print_grid(int grid[GRID_SIZE][GRID_SIZE]) {
     }
 }
 
+void log_grid(int grid[GRID_SIZE][GRID_SIZE]) {
+
+    char grid_string[30] = "";
+    int i, j;
+    for (i = 0; i < GRID_SIZE; ++i) {
+        for (j = 0; j < GRID_SIZE; ++j) {
+            char c = '0' + grid[i][j] + 1;
+            char *ptr = malloc(2 * sizeof(char));
+            ptr[0] = c;
+            ptr[1] = '\0';
+            strcat(grid_string, ptr);
+        }
+    }
+    fprintf(f, "Case: %s || result: %d\n", grid_string, check_win(grid));
+
+}
+
+void solve_grid(int grid[GRID_SIZE][GRID_SIZE]) {
+    while (check_win(grid) == GAME_IN_PROCESS) {
+        computer_turn(grid, X);
+        if (check_win(grid) != GAME_IN_PROCESS) return;
+        computer_turn(grid, O);
+        if (check_win(grid) != GAME_IN_PROCESS) return;
+    }
+}
+
+void try_all(int grid[GRID_SIZE][GRID_SIZE], int idx) {
+    if (idx >= 9) return;
+    int i = idx / 3, j = idx % 3;
+    idx++;
+
+    int k, l;
+    int solveGrid[GRID_SIZE][GRID_SIZE];
+    for (k = 0; k < GRID_SIZE; ++k)
+        for (l = 0; l < GRID_SIZE; ++l)
+            solveGrid[k][l] = grid[k][l];
+    solve_grid(solveGrid);
+    log_grid(solveGrid);
+
+    int newGridX[GRID_SIZE][GRID_SIZE];
+    for (k = 0; k < GRID_SIZE; ++k)
+        for (l = 0; l < GRID_SIZE; ++l)
+            newGridX[k][l] = grid[k][l];
+
+    newGridX[i][j] = X;
+    int newGridO[GRID_SIZE][GRID_SIZE];
+    for (k = 0; k < GRID_SIZE; ++k)
+        for (l = 0; l < GRID_SIZE; ++l)
+            newGridO[k][l] = grid[k][l];
+
+    newGridO[i][j] = O;
+
+    try_all(newGridX, idx);
+    try_all(newGridO, idx);
+
+
+}
+
 int main() {
+    f = fopen("S:\\People Folders\\Walid Emad\\XO_Project\\XO_Project\\log.txt", "w");
     int grid[GRID_SIZE][GRID_SIZE] = {
             {-1, -1, -1},
             {-1, -1, -1},
             {-1, -1, -1}};
-    while (check_win(grid) == GAME_IN_PROCESS) {
-        computer_turn(grid, X);
-        print_grid(grid);
-        puts("");
-        if (check_win(grid) != GAME_IN_PROCESS) {
-            printf("X WINS\n");
-        }
-        computer_turn(grid, O);
-        print_grid(grid);
-        puts("");
-        if (check_win(grid) != GAME_IN_PROCESS)
-            printf("O WINS\n");
-        if (!check_win(grid)) return 0;
-    }
+
+    try_all(grid, 0);
+    /*solve_grid(noChange);
+    print_grid(grid);
+    print_grid(noChange);
+    log_grid(grid);*/
+    printf("FINISHED\n");
+    fclose(f);
     return 0;
 }
 
