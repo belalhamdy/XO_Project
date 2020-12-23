@@ -19,7 +19,7 @@
  * Anything Else -> GAME_IN_PROCESS (GRID_SIZE * 4)
  */
 FILE *f;
-
+int cnt = 0;
 int check_win(int grid[GRID_SIZE][GRID_SIZE]);
 
 int computer_turn(int grid[GRID_SIZE][GRID_SIZE], int computer_mark);
@@ -34,6 +34,16 @@ void print_grid(int grid[GRID_SIZE][GRID_SIZE]) {
     }
 }
 
+
+
+void solve_grid(int grid[GRID_SIZE][GRID_SIZE]) {
+    while (check_win(grid) == GAME_IN_PROCESS) {
+        computer_turn(grid, X);
+        if (check_win(grid) != GAME_IN_PROCESS) return;
+        computer_turn(grid, O);
+        if (check_win(grid) != GAME_IN_PROCESS) return;
+    }
+}
 void log_grid(int grid[GRID_SIZE][GRID_SIZE]) {
 
     char grid_string[30] = "";
@@ -47,21 +57,12 @@ void log_grid(int grid[GRID_SIZE][GRID_SIZE]) {
             strcat(grid_string, ptr);
         }
     }
+    solve_grid(grid);
     fprintf(f, "Case: %s || result: %d\n", grid_string, check_win(grid));
 
 }
-
-void solve_grid(int grid[GRID_SIZE][GRID_SIZE]) {
-    while (check_win(grid) == GAME_IN_PROCESS) {
-        computer_turn(grid, X);
-        if (check_win(grid) != GAME_IN_PROCESS) return;
-        computer_turn(grid, O);
-        if (check_win(grid) != GAME_IN_PROCESS) return;
-    }
-}
-
 void try_all(int grid[GRID_SIZE][GRID_SIZE], int idx) {
-    if (idx >= 9) return;
+    cnt++;
     int i = idx / 3, j = idx % 3;
     idx++;
 
@@ -70,24 +71,33 @@ void try_all(int grid[GRID_SIZE][GRID_SIZE], int idx) {
     for (k = 0; k < GRID_SIZE; ++k)
         for (l = 0; l < GRID_SIZE; ++l)
             solveGrid[k][l] = grid[k][l];
-    solve_grid(solveGrid);
-    log_grid(solveGrid);
 
+    log_grid(solveGrid);
     int newGridX[GRID_SIZE][GRID_SIZE];
     for (k = 0; k < GRID_SIZE; ++k)
         for (l = 0; l < GRID_SIZE; ++l)
             newGridX[k][l] = grid[k][l];
 
-    newGridX[i][j] = X;
     int newGridO[GRID_SIZE][GRID_SIZE];
     for (k = 0; k < GRID_SIZE; ++k)
         for (l = 0; l < GRID_SIZE; ++l)
             newGridO[k][l] = grid[k][l];
 
+    int newGridE[GRID_SIZE][GRID_SIZE];
+    for (k = 0; k < GRID_SIZE; ++k)
+        for (l = 0; l < GRID_SIZE; ++l)
+            newGridE[k][l] = grid[k][l];
+
+    newGridE[i][j] = EMPTY;
+    newGridX[i][j] = X;
     newGridO[i][j] = O;
 
-    try_all(newGridX, idx);
+    if (idx == 10) return;
+
+    try_all(newGridE,idx);
     try_all(newGridO, idx);
+    try_all(newGridX, idx);
+
 
 
 }
@@ -104,7 +114,7 @@ int main() {
     print_grid(grid);
     print_grid(noChange);
     log_grid(grid);*/
-    printf("FINISHED\n");
+    printf("FINISHED\n%d",cnt);
     fclose(f);
     return 0;
 }
